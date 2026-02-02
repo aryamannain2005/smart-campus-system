@@ -678,7 +678,7 @@ def student_dashboard(request):
 
 @login_required
 def student_profile(request):
-    """View and edit student profile."""
+    """View and edit student profile with face recognition."""
     if not hasattr(request.user, 'student_profile'):
         if hasattr(request.user, 'faculty_profile'):
             return redirect('attendance:dashboard')
@@ -691,20 +691,74 @@ def student_profile(request):
         # Update profile fields
         student.phone = request.POST.get('phone', student.phone)
         
-        # Handle profile image update
+        # Handle profile image update with face detection
         if 'profile_image' in request.FILES:
-            student.profile_image = request.FILES['profile_image']
-            # Re-encode face
+            uploaded_image = request.FILES['profile_image']
+            
+            # Save temporarily to detect face
+            import tempfile
+            import os
+            
+            # Get file extension
+            ext = os.path.splitext(uploaded_image.name)[1].lower()
+            if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
+                messages.error(request, 'Invalid image format. Please upload JPG, PNG, or GIF.')
+                return redirect('attendance:student_profile')
+            
+            # Save to temp file for face detection
+            with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+                for chunk in uploaded_image.chunks():
+                    tmp.write(chunk)
+                tmp_path = tmp.name
+            
             try:
-                from face_recognition.utils import encode_face_from_image
-                encoding = encode_face_from_image(student.profile_image.path)
+                # Detect face using our AI engine
+                from face_recognition.ai_engine import FaceRecognitionEngine
+                engine = FaceRecognitionEngine()
+                
+                # Check if face is detected
+                faces = engine.detect_faces(tmp_path)
+                
+                if not faces:
+                    messages.error(request, '❌ No face detected in the image. Please upload a clear photo of your face.')
+                    os.unlink(tmp_path)
+                    return redirect('attendance:student_profile')
+                
+                if len(faces) > 1:
+                    messages.warning(request, '⚠️ Multiple faces detected. Please upload a photo with only your face.')
+                    os.unlink(tmp_path)
+                    return redirect('attendance:student_profile')
+                
+                # Face detected - generate encoding
+                encoding = engine.encode_face(tmp_path)
+                
                 if encoding is not None:
-                    student.face_encoding = encoding
-            except Exception:
-                pass
+                    # Save the encoding as bytes
+                    import pickle
+                    student.face_encoding = pickle.dumps(encoding)
+                    student.face_registered = True
+                    
+                    # Now save the actual image
+                    uploaded_image.seek(0)  # Reset file pointer
+                    student.profile_image = uploaded_image
+                    student.save()
+                    
+                    messages.success(request, '✅ Face registered successfully! You can now use face recognition for attendance.')
+                else:
+                    messages.error(request, '❌ Could not process face. Please try a different photo.')
+                
+                # Clean up temp file
+                os.unlink(tmp_path)
+                
+            except Exception as e:
+                messages.error(request, f'Error processing image: Please try again.')
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
+                return redirect('attendance:student_profile')
+        else:
+            student.save()
+            messages.success(request, 'Profile updated successfully!')
         
-        student.save()
-        messages.success(request, 'Profile updated successfully!')
         return redirect('attendance:student_profile')
     
     context = {
