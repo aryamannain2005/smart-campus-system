@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Campus - Attendance Management{% endblock %}</title>
+    
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    <style>
+        /* LPU UMS Inspired Theme - Inline Critical Styles */
+        :root {
+            --primary-color: #f26522;
+            --primary-dark: #d85a1b;
+            --primary-light: #ff8c4b;
+            --secondary-color: #1a365d;
+            --success-color: #38a169;
+            --danger-color: #e53e3e;
+            --warning-color: #ecc94b;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8eaed 100%);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1a365d 0%, #2d3748 100%);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 0.875rem 1.25rem;
+            border-radius: 0;
+            margin: 0;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: rgba(242, 101, 34, 0.15);
+            border-left-color: var(--primary-color);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .brand-text {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: block;
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .brand-text i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(242, 101, 34, 0.3);
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(242, 101, 34, 0.4);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .stat-card {
+            border-left: 5px solid;
+            border-radius: 12px;
+        }
+        
+        .stat-card.primary { border-left-color: var(--primary-color); }
+        .stat-card.success { border-left-color: var(--success-color); }
+        .stat-card.danger { border-left-color: var(--danger-color); }
+        .stat-card.warning { border-left-color: var(--warning-color); }
+        
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.15;
+        }
+        
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin: 0;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-badge {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.15);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            border-left: 4px solid;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1.5rem 1.25rem 0.5rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            {% if user.is_authenticated %}
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse py-0">
+                <div class="text-center">
+                    <a href="{% url 'attendance:home' %}" class="brand-text">
+                        <i class="fas fa-graduation-cap"></i> Smart Campus
+                    </a>
+                </div>
+                
+                <div class="nav-section-title">Main Menu</div>
+                
+                <ul class="nav flex-column">
+                    {% if user.faculty_profile %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'attendance:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'create_session' %}active{% endif %}" href="{% url 'attendance:create_session' %}">
+                            <i class="fas fa-plus-circle"></i> New Session
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manage_courses' or request.resolver_match.url_name == 'create_course' %}active{% endif %}" href="{% url 'attendance:manage_courses' %}">
+                            <i class="fas fa-book"></i> My Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'attendance:reports' %}">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                    {% elif user.student_profile %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_dashboard' %}active{% endif %}" href="{% url 'attendance:student_dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_profile' %}active{% endif %}" href="{% url 'attendance:student_profile' %}">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <div class="nav-section-title">Account</div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'attendance:logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            {% endif %}
+            
+            <!-- Main Content -->
+            <main class="{% if user.is_authenticated %}col-md-9 ms-sm-auto col-lg-10{% else %}col-12{% endif %} px-md-4 py-4">
+                {% if user.is_authenticated %}
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+                    <div class="user-info">
+                        <span class="text-muted">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.get_full_name|default:user.username }}
+                        </span>
+                        {% if user.faculty_profile %}
+                        <span class="user-badge">
+                            <i class="fas fa-chalkboard-teacher me-1"></i> {{ user.faculty_profile.designation }}
+                        </span>
+                        {% elif user.student_profile %}
+                        <span class="user-badge">
+                            <i class="fas fa-user-graduate me-1"></i> Student
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        {% if message.tags == 'success' %}
+                        <i class="fas fa-check-circle me-2"></i>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% else %}
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% endif %}
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Page Content -->
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+    
+    <!-- jQuery (load first) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // CSRF Token for AJAX requests
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+        
+        // Add fade-in animation to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('fade-in');
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

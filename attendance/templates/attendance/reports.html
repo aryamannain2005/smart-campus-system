@@ -1,0 +1,134 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Attendance Reports - Smart Campus{% endblock %}
+{% block page_title %}Attendance Reports{% endblock %}
+
+{% block content %}
+<!-- Filter Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filter Reports
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Course</label>
+                {{ form.course }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Start Date</label>
+                {{ form.start_date }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">End Date</label>
+                {{ form.end_date }}
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reports Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-chart-bar me-2"></i>Session Reports
+        </h6>
+        <button class="btn btn-sm btn-outline-success" onclick="exportToCSV()">
+            <i class="fas fa-download me-1"></i>Export CSV
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="reports-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Course</th>
+                        <th>Total</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Attendance %</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in report_data %}
+                    <tr>
+                        <td>{{ item.session.date|date:"M d, Y" }}</td>
+                        <td>
+                            <strong>{{ item.session.course.code }}</strong>
+                            <br><small class="text-muted">{{ item.session.course.name }}</small>
+                        </td>
+                        <td>{{ item.stats.total }}</td>
+                        <td><span class="text-success">{{ item.stats.present }}</span></td>
+                        <td><span class="text-danger">{{ item.stats.absent }}</span></td>
+                        <td>
+                            {% if item.stats.total > 0 %}
+                            {% widthratio item.stats.present item.stats.total 100 as percentage %}
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar {% if percentage >= 75 %}bg-success{% elif percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ percentage }}%">
+                                    {{ percentage }}%
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'attendance:session_detail' item.session.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No sessions found matching the criteria
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function exportToCSV() {
+        // Simple CSV export functionality
+        let csv = 'Date,Course,Total,Present,Absent,Percentage\n';
+        $('#reports-table tbody tr').each(function() {
+            const cells = $(this).find('td');
+            if (cells.length > 1) {
+                const row = [
+                    $(cells[0]).text().trim(),
+                    $(cells[1]).text().trim().replace(/\n/g, ' '),
+                    $(cells[2]).text().trim(),
+                    $(cells[3]).text().trim(),
+                    $(cells[4]).text().trim(),
+                    $(cells[5]).find('.progress-bar').text().trim() || 'N/A'
+                ];
+                csv += row.join(',') + '\n';
+            }
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'attendance_report.csv';
+        a.click();
+    }
+</script>
+{% endblock %}

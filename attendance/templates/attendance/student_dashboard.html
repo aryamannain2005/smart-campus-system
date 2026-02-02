@@ -1,0 +1,266 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Student Dashboard - Smart Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-sidebar {
+        background: linear-gradient(180deg, #1cc88a 10%, #17a673 100%) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Student Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar student-sidebar collapse py-3">
+            <div class="text-center mb-4">
+                <a href="{% url 'attendance:student_dashboard' %}" class="brand-text">
+                    <i class="fas fa-university"></i> Smart Campus
+                </a>
+            </div>
+            
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'attendance:student_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'attendance:student_profile' %}">
+                        <i class="fas fa-user-edit"></i> My Profile
+                    </a>
+                </li>
+                <li class="nav-item mt-4">
+                    <a class="nav-link" href="{% url 'attendance:logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <!-- Topbar -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h4">My Attendance Dashboard</h1>
+                <div class="d-flex align-items-center">
+                    <span class="text-muted me-3">
+                        <i class="fas fa-user-graduate"></i> {{ student.full_name }}
+                    </span>
+                    <span class="badge bg-success">
+                        {{ student.student_id }}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card primary h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Classes</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total }}</div>
+                                </div>
+                                <i class="fas fa-calendar stat-icon text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card success h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Present</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.present }}</div>
+                                </div>
+                                <i class="fas fa-check-circle stat-icon text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card danger h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Absent</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.absent }}</div>
+                                </div>
+                                <i class="fas fa-times-circle stat-icon text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card warning h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Attendance %</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.percentage }}%</div>
+                                </div>
+                                <i class="fas fa-percentage stat-icon text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Course-wise Attendance -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-book me-2"></i>Course-wise Attendance
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if course_stats %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Course</th>
+                                            <th>Classes</th>
+                                            <th>Present</th>
+                                            <th>%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in course_stats %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ item.course.code }}</strong><br>
+                                                <small class="text-muted">{{ item.course.name }}</small>
+                                            </td>
+                                            <td>{{ item.stats.total }}</td>
+                                            <td>{{ item.stats.present }}</td>
+                                            <td>
+                                                <span class="badge {% if item.stats.percentage >= 75 %}bg-success{% elif item.stats.percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                    {{ item.stats.percentage }}%
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">
+                                <i class="fas fa-info-circle me-2"></i>You are not enrolled in any courses yet.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Attendance -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-history me-2"></i>Recent Attendance
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_attendance %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Course</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in recent_attendance %}
+                                        <tr>
+                                            <td>{{ record.session.date|date:"M d, Y" }}</td>
+                                            <td>{{ record.session.course.code }}</td>
+                                            <td>
+                                                <span class="badge badge-{{ record.status }}">
+                                                    {{ record.get_status_display }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center py-4">
+                                <i class="fas fa-info-circle me-2"></i>No attendance records yet.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Info Card -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-user me-2"></i>My Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 text-center mb-3">
+                                    {% if student.profile_image %}
+                                    <img src="{{ student.profile_image.url }}" alt="Profile" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px;">
+                                        <i class="fas fa-user fa-3x text-white"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-10">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Name:</strong> {{ student.full_name }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Student ID:</strong> {{ student.student_id }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Roll Number:</strong> {{ student.roll_number }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Department:</strong> {{ student.department }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Semester:</strong> {{ student.semester }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Section:</strong> {{ student.section }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Email:</strong> {{ student.email }}
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <strong>Phone:</strong> {{ student.phone|default:"Not provided" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

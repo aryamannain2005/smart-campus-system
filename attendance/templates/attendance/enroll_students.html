@@ -1,0 +1,229 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Enroll Students - {{ course.code }}{% endblock %}
+{% block page_title %}Enroll Students in {{ course.code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .student-card:hover {
+        border-color: #f26522;
+        background-color: #fff5f0;
+    }
+    
+    .student-card.selected {
+        border-color: #38a169;
+        background-color: #f0fff4;
+    }
+    
+    .student-card input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #38a169;
+    }
+    
+    .student-info {
+        flex: 1;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #1a365d;
+    }
+    
+    .student-details {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+    
+    .select-all-btn {
+        margin-bottom: 1rem;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .count-badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-user-plus me-2"></i>Select Students to Enroll
+                </h6>
+                <span class="badge bg-primary count-badge" id="selected-count">
+                    {{ enrolled_ids|length }} selected
+                </span>
+            </div>
+            <div class="card-body">
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="search-student" placeholder="🔍 Search by name, roll number, or ID...">
+                        </div>
+                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="selectAll()">
+                                <i class="fas fa-check-double me-1"></i>Select All
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="deselectAll()">
+                                <i class="fas fa-times me-1"></i>Deselect All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="post" id="enroll-form">
+                    {% csrf_token %}
+                    
+                    <div class="students-list" style="max-height: 500px; overflow-y: auto;">
+                        {% for student in all_students %}
+                        <label class="student-card d-flex align-items-center {% if student.id in enrolled_ids %}selected{% endif %}" data-student-id="{{ student.id }}">
+                            <input type="checkbox" 
+                                   name="students" 
+                                   value="{{ student.id }}" 
+                                   class="me-3 student-checkbox"
+                                   {% if student.id in enrolled_ids %}checked{% endif %}>
+                            <div class="student-info">
+                                <div class="student-name">{{ student.full_name }}</div>
+                                <div class="student-details">
+                                    <span class="me-3"><i class="fas fa-id-card me-1"></i>{{ student.student_id }}</span>
+                                    <span class="me-3"><i class="fas fa-hashtag me-1"></i>{{ student.roll_number }}</span>
+                                    {% if student.department %}
+                                    <span><i class="fas fa-building me-1"></i>{{ student.department.name }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </label>
+                        {% empty %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <p>No students registered in the system yet.</p>
+                            <a href="{% url 'attendance:student_register' %}" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>Register Students
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'attendance:manage_courses' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Enrollment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Course Info Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-book me-2"></i>Course Details
+                </h6>
+            </div>
+            <div class="card-body">
+                <h5 class="text-primary">{{ course.code }}</h5>
+                <p class="mb-2">{{ course.name }}</p>
+                <hr>
+                <div class="d-flex justify-content-between text-muted small">
+                    <span><i class="fas fa-building me-1"></i>{{ course.department|default:"N/A" }}</span>
+                    <span><i class="fas fa-calendar me-1"></i>Sem {{ course.semester }}</span>
+                    <span><i class="fas fa-star me-1"></i>{{ course.credits }} Credits</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-chart-pie me-2"></i>Enrollment Stats
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Currently Enrolled</span>
+                        <strong id="current-enrolled">{{ enrolled_ids|length }}</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: {% widthratio enrolled_ids|length all_students|length 100 %}%"></div>
+                    </div>
+                </div>
+                <div class="text-muted small">
+                    <i class="fas fa-users me-1"></i>Total Students: {{ all_students|length }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateCount() {
+        const count = $('.student-checkbox:checked').length;
+        $('#selected-count').text(count + ' selected');
+        $('#current-enrolled').text(count);
+    }
+    
+    function selectAll() {
+        $('.student-checkbox').prop('checked', true);
+        $('.student-card').addClass('selected');
+        updateCount();
+    }
+    
+    function deselectAll() {
+        $('.student-checkbox').prop('checked', false);
+        $('.student-card').removeClass('selected');
+        updateCount();
+    }
+    
+    $(document).ready(function() {
+        // Toggle selected class on checkbox change
+        $('.student-checkbox').on('change', function() {
+            $(this).closest('.student-card').toggleClass('selected', this.checked);
+            updateCount();
+        });
+        
+        // Search functionality
+        $('#search-student').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('.student-card').each(function() {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.includes(searchTerm));
+            });
+        });
+        
+        // Initial count
+        updateCount();
+    });
+</script>
+{% endblock %}

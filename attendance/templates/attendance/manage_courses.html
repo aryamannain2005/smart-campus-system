@@ -1,0 +1,70 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}My Courses - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>📚 My Courses</h3>
+        <a href="{% url 'attendance:create_course' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add New Course
+        </a>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if courses %}
+    <div class="row">
+        {% for course in courses %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm {% if not course.is_active %}border-secondary{% endif %}">
+                <div class="card-header {% if course.is_active %}bg-primary text-white{% else %}bg-secondary text-white{% endif %}">
+                    <h6 class="mb-0">{{ course.code }}</h6>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-building me-1"></i>{{ course.department }}<br>
+                            <i class="fas fa-graduation-cap me-1"></i>Semester {{ course.semester }}<br>
+                            <i class="fas fa-star me-1"></i>{{ course.credits }} Credits<br>
+                            <i class="fas fa-users me-1"></i>{{ course.students.count }} Students
+                        </small>
+                    </p>
+                    {% if not course.is_active %}
+                    <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'attendance:enroll_students' course.id %}" class="btn btn-sm btn-success">
+                        <i class="fas fa-user-plus me-1"></i>Enroll
+                    </a>
+                    <a href="{% url 'attendance:course_students' course.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-users me-1"></i>Students
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h5><i class="fas fa-info-circle me-2"></i>No Courses Yet</h5>
+        <p class="mb-0">You haven't created any courses yet. Click the "Add New Course" button to create your first course.</p>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

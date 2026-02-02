@@ -1,0 +1,238 @@
+{% extends 'attendance/base.html' %}
+{% load static %}
+
+{% block title %}Faculty Login - Smart Campus{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 50%, #1a365d 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 50%, rgba(242, 101, 34, 0.08) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+    }
+    
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #f26522 0%, #ff8c4b 100%);
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .login-icon {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #f26522 0%, #ff8c4b 100%);
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(242, 101, 34, 0.4);
+    }
+    
+    .login-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .login-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a365d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-subtitle {
+        color: #718096;
+        font-size: 0.95rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #f26522;
+        box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.15);
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #f26522 0%, #ff8c4b 100%);
+        border: none;
+        border-radius: 50px;
+        padding: 0.875rem;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 8px 25px rgba(242, 101, 34, 0.35);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(242, 101, 34, 0.45);
+    }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        color: #a0aec0;
+        font-size: 0.85rem;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+    
+    .divider span {
+        padding: 0 1rem;
+    }
+    
+    .link-text {
+        color: #f26522;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .link-text:hover {
+        text-decoration: underline;
+        color: #d85a1b;
+    }
+    
+    .back-link {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        z-index: 10;
+        font-size: 0.95rem;
+        transition: color 0.3s ease;
+    }
+    
+    .back-link:hover {
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'attendance:home' %}" class="back-link">
+    <i class="fas fa-arrow-left me-2"></i>Back to Home
+</a>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="text-center mb-4">
+            <div class="login-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h2 class="login-title">Faculty Login</h2>
+            <p class="login-subtitle">Smart Campus Attendance System</p>
+        </div>
+        
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-user me-1"></i>Username / Employee ID
+                </label>
+                {{ form.username }}
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label">
+                    <i class="fas fa-lock me-1"></i>Password
+                </label>
+                {{ form.password }}
+            </div>
+            
+            <div class="d-grid mb-4">
+                <button type="submit" class="btn btn-primary btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </button>
+            </div>
+        </form>
+        
+        <div class="divider my-4">
+            <span>or</span>
+        </div>
+        
+        <div class="text-center mb-3">
+            <p class="mb-2 text-muted small">New faculty member?</p>
+            <a href="{% url 'attendance:faculty_register' %}" class="link-text">
+                <i class="fas fa-user-plus me-1"></i>Register as Faculty
+            </a>
+        </div>
+        
+        <div class="text-center pt-3 border-top">
+            <p class="mb-2 text-muted small">
+                <i class="fas fa-user-graduate me-1"></i>Are you a student?
+            </p>
+            <a href="{% url 'attendance:student_login' %}" class="btn btn-outline-success btn-sm me-1">
+                Student Login
+            </a>
+            <a href="{% url 'attendance:student_register' %}" class="btn btn-success btn-sm">
+                Register
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

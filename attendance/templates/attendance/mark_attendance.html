@@ -1,0 +1,239 @@
+{% extends 'attendance/base.html' %}
+{% load attendance_tags %}
+
+{% block title %}Mark Attendance - Smart Campus{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-row {
+        transition: background-color 0.3s ease;
+    }
+    .student-row.marked-present {
+        background-color: rgba(28, 200, 138, 0.1);
+    }
+    .student-row.marked-absent {
+        background-color: rgba(231, 74, 59, 0.1);
+    }
+    .student-row.marked-late {
+        background-color: rgba(246, 194, 62, 0.1);
+    }
+    .quick-mark-btn {
+        min-width: 100px;
+    }
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Session Info -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-1">{{ session.course.code }} - {{ session.course.name }}</h5>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-calendar me-2"></i>{{ session.date|date:"F d, Y" }}
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-clock me-2"></i>{{ session.start_time|time:"h:i A" }}
+                    <span class="mx-2">|</span>
+                    <span class="badge bg-info">{{ session.get_session_type_display }}</span>
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'attendance:face_recognition_attendance' session.id %}" class="btn btn-success">
+                    <i class="fas fa-camera me-2"></i>Use Face Recognition
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4" id="live-stats">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center py-2">
+                <h4 class="mb-0" id="total-count">{{ students.count }}</h4>
+                <small class="text-muted">Total Students</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center py-2">
+                <h4 class="mb-0" id="present-count">0</h4>
+                <small>Present</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center py-2">
+                <h4 class="mb-0" id="absent-count">0</h4>
+                <small>Absent</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning">
+            <div class="card-body text-center py-2">
+                <h4 class="mb-0" id="late-count">0</h4>
+                <small>Late</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <button type="button" class="btn btn-sm btn-success me-2" onclick="markAllAs('present')">
+                    <i class="fas fa-check-double me-1"></i>Mark All Present
+                </button>
+                <button type="button" class="btn btn-sm btn-danger me-2" onclick="markAllAs('absent')">
+                    <i class="fas fa-times me-1"></i>Mark All Absent
+                </button>
+            </div>
+            <div>
+                <input type="text" class="form-control form-control-sm" id="search-student" placeholder="Search student..." style="width: 200px;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Form -->
+<form method="post" id="attendance-form">
+    {% csrf_token %}
+    <div class="card">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-users me-2"></i>Student List
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="attendance-table">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">#</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th style="width: 200px;">Status</th>
+                            <th style="width: 250px;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        {% with record=existing_records|get_item:student.id %}
+                        <tr class="student-row" data-student-id="{{ student.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td><strong>{{ student.roll_number }}</strong></td>
+                            <td>
+                                {{ student.full_name }}
+                                <br><small class="text-muted">{{ student.student_id }}</small>
+                            </td>
+                            <td>
+                                <select name="status_{{ student.id }}" class="form-select form-select-sm status-select" data-student="{{ student.id }}">
+                                    <option value="present" {% if record.status == 'present' %}selected{% endif %}>Present</option>
+                                    <option value="absent" {% if not record or record.status == 'absent' %}selected{% endif %}>Absent</option>
+                                    <option value="late" {% if record.status == 'late' %}selected{% endif %}>Late</option>
+                                    <option value="excused" {% if record.status == 'excused' %}selected{% endif %}>Excused</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" name="notes_{{ student.id }}" class="form-control form-control-sm" placeholder="Optional notes..." value="{{ record.notes|default:'' }}">
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                No students enrolled in this course
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-save me-2"></i>Save Attendance
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update live statistics
+    function updateStats() {
+        let present = 0, absent = 0, late = 0, excused = 0;
+        
+        $('.status-select').each(function() {
+            const status = $(this).val();
+            if (status === 'present') present++;
+            else if (status === 'absent') absent++;
+            else if (status === 'late') late++;
+            else if (status === 'excused') excused++;
+        });
+        
+        $('#present-count').text(present);
+        $('#absent-count').text(absent);
+        $('#late-count').text(late);
+    }
+    
+    // Update row styling based on status
+    function updateRowStyle(row, status) {
+        row.removeClass('marked-present marked-absent marked-late');
+        row.addClass('marked-' + status);
+    }
+    
+    // Mark all students with a specific status
+    function markAllAs(status) {
+        $('.status-select').val(status).trigger('change');
+    }
+    
+    // Event listeners
+    $(document).ready(function() {
+        // Status change handler
+        $('.status-select').on('change', function() {
+            const row = $(this).closest('.student-row');
+            const status = $(this).val();
+            updateRowStyle(row, status);
+            updateStats();
+        });
+        
+        // Initialize stats and row styles
+        $('.status-select').each(function() {
+            const row = $(this).closest('.student-row');
+            const status = $(this).val();
+            updateRowStyle(row, status);
+        });
+        updateStats();
+        
+        // Search functionality
+        $('#search-student').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase();
+            $('#attendance-table tbody tr').each(function() {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.includes(searchTerm));
+            });
+        });
+    });
+</script>
+{% endblock %}

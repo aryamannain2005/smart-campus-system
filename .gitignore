@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
+
+# Django
+*.log
+local_settings.py
+# db.sqlite3  # Include for demo purposes
+db.sqlite3-journal
+/media/faces/*
+/media/student_images/*
+/staticfiles
+# /static  # Include static files
+
+# SSL Certificates (don't commit these)
+*.pem
+cert.pem
+key.pem
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Logs
+logs/
+*.log
+
+# Backup files
+*.bak
+*.tmp

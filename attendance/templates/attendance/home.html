@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus - Attendance Management System</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #f26522;
+            --primary-dark: #d85a1b;
+            --primary-light: #ff8c4b;
+            --secondary-color: #1a365d;
+            --dark-color: #2d3748;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 50%, #1a365d 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Background Animation */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(242, 101, 34, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255, 140, 75, 0.05) 0%, transparent 40%);
+            animation: rotate 30s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 2rem 0 3rem;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(242, 101, 34, 0.4);
+        }
+        
+        .logo-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .logo-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        
+        .logo-text span {
+            color: var(--primary-color);
+        }
+        
+        .tagline {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Portal Cards */
+        .portal-cards {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+            margin-bottom: 4rem;
+        }
+        
+        .portal-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            width: 340px;
+            text-align: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+        }
+        
+        .portal-card.faculty::before {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        }
+        
+        .portal-card.student::before {
+            background: linear-gradient(90deg, #38a169 0%, #48bb78 100%);
+        }
+        
+        .portal-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        
+        .portal-card.faculty .portal-icon {
+            background: linear-gradient(135deg, rgba(242, 101, 34, 0.1) 0%, rgba(255, 140, 75, 0.1) 100%);
+            color: var(--primary-color);
+        }
+        
+        .portal-card.student .portal-icon {
+            background: linear-gradient(135deg, rgba(56, 161, 105, 0.1) 0%, rgba(72, 187, 120, 0.1) 100%);
+            color: #38a169;
+        }
+        
+        .portal-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.75rem;
+        }
+        
+        .portal-card p {
+            color: #718096;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .btn-portal {
+            display: inline-block;
+            padding: 0.875rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-faculty {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(242, 101, 34, 0.35);
+        }
+        
+        .btn-faculty:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(242, 101, 34, 0.45);
+            color: white;
+        }
+        
+        .btn-student {
+            background: linear-gradient(135deg, #38a169 0%, #48bb78 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(56, 161, 105, 0.35);
+        }
+        
+        .btn-student:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(56, 161, 105, 0.45);
+            color: white;
+        }
+        
+        .register-link {
+            display: block;
+            color: #718096;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .register-link:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Features Section */
+        .features-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 3rem;
+            max-width: 1000px;
+            margin: 0 auto 3rem;
+        }
+        
+        .features-title {
+            text-align: center;
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(242, 101, 34, 0.3);
+        }
+        
+        .feature-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .feature-item h4 {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-item p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+        }
+        
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            
+            .portal-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .portal-card {
+                width: 100%;
+                max-width: 340px;
+            }
+            
+            .features-section {
+                margin: 0 1rem 3rem;
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div class="main-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1 class="logo-text">Smart<span>Campus</span></h1>
+            </div>
+            <p class="tagline">Intelligent Attendance Management System</p>
+        </header>
+        
+        <!-- Alert Messages -->
+        {% if messages %}
+        <div class="container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Portal Cards -->
+        <div class="portal-cards">
+            <!-- Faculty Portal -->
+            <div class="portal-card faculty">
+                <div class="portal-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3>Faculty Portal</h3>
+                <p>Manage attendance sessions, view reports, and track student performance with powerful analytics.</p>
+                <a href="{% url 'attendance:login' %}" class="btn-portal btn-faculty">
+                    <i class="fas fa-sign-in-alt me-2"></i>Faculty Login
+                </a>
+                <a href="{% url 'attendance:faculty_register' %}" class="register-link">
+                    <i class="fas fa-user-plus me-1"></i> New Faculty? Register here
+                </a>
+            </div>
+            
+            <!-- Student Portal -->
+            <div class="portal-card student">
+                <div class="portal-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h3>Student Portal</h3>
+                <p>View your attendance records, check statistics, and manage your profile with ease.</p>
+                <a href="{% url 'attendance:student_login' %}" class="btn-portal btn-student">
+                    <i class="fas fa-sign-in-alt me-2"></i>Student Login
+                </a>
+                <a href="{% url 'attendance:student_register' %}" class="register-link">
+                    <i class="fas fa-user-plus me-1"></i> New Student? Register here
+                </a>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2 class="features-title">
+                <i class="fas fa-star me-2" style="color: var(--primary-color);"></i>
+                Key Features
+            </h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <h4>Face Recognition</h4>
+                    <p>AI-powered attendance with facial recognition</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Real-time Analytics</h4>
+                    <p>Instant attendance statistics and reports</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h4>Smart Notifications</h4>
+                    <p>Automated alerts for absences</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Mobile Ready</h4>
+                    <p>Access from any device, anywhere</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2026 Smart Campus Management System</p>
+            <p>Powered by <a href="#">Django</a> | Inspired by LPU UMS</p>
+        </footer>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

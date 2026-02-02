@@ -1,0 +1,84 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Course Students - Smart Campus{% endblock %}
+{% block page_title %}Course Students{% endblock %}
+
+{% block content %}
+<!-- Course Info -->
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-1">{{ course.code }} - {{ course.name }}</h4>
+        <p class="text-muted mb-0">
+            <span class="badge bg-info">{{ course.department.name }}</span>
+            <span class="badge bg-secondary">Semester {{ course.semester }}</span>
+            <span class="badge bg-secondary">{{ course.credits }} Credits</span>
+        </p>
+    </div>
+</div>
+
+<!-- Students List -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-users me-2"></i>Enrolled Students ({{ students.count }})
+        </h6>
+        <input type="text" class="form-control form-control-sm" id="search-student" placeholder="Search..." style="width: 200px;">
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="students-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Section</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ student.roll_number }}</strong></td>
+                        <td>{{ student.full_name }}</td>
+                        <td><small class="text-muted">{{ student.student_id }}</small></td>
+                        <td>{{ student.section }}</td>
+                        <td>
+                            <a href="{% url 'attendance:student_detail' student.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View Attendance
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No students enrolled in this course
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $('#search-student').on('keyup', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        $('#students-table tbody tr').each(function() {
+            const text = $(this).text().toLowerCase();
+            $(this).toggle(text.includes(searchTerm));
+        });
+    });
+</script>
+{% endblock %}

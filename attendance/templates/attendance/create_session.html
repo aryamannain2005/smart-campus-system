@@ -1,0 +1,105 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Create Session - Smart Campus{% endblock %}
+{% block page_title %}Create Attendance Session{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-plus-circle me-2"></i>New Attendance Session
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if not form.course.field.queryset.exists %}
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>No Courses Available</h5>
+                    <p class="mb-2">You need to create a course before starting an attendance session.</p>
+                    <a href="{% url 'attendance:create_course' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Your First Course
+                    </a>
+                </div>
+                {% else %}
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Course</label>
+                            {{ form.course }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date</label>
+                            {{ form.date }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Start Time</label>
+                            {{ form.start_time }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">End Time (Optional)</label>
+                            {{ form.end_time }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Session Type</label>
+                            {{ form.session_type }}
+                            <small class="text-muted d-block mt-1">
+                                Choose how attendance will be captured
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check me-2"></i>Create & Mark Attendance
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Session Type Info -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-info-circle me-2"></i>Session Types
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6><i class="fas fa-hand-pointer text-primary me-2"></i>Manual Entry</h6>
+                        <p class="text-muted small">Traditional roll call - mark each student manually</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6><i class="fas fa-camera text-success me-2"></i>Face Recognition</h6>
+                        <p class="text-muted small">AI-powered automatic attendance using facial recognition</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6><i class="fas fa-mobile-alt text-warning me-2"></i>Mobile App</h6>
+                        <p class="text-muted small">Students mark attendance via mobile app with GPS verification</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6><i class="fas fa-qrcode text-info me-2"></i>QR Code</h6>
+                        <p class="text-muted small">Generate QR code for students to scan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

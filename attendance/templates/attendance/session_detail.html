@@ -1,0 +1,165 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Session Details - Smart Campus{% endblock %}
+{% block page_title %}Session Details{% endblock %}
+
+{% block content %}
+<!-- Session Info Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h4 class="mb-2">{{ session.course.code }} - {{ session.course.name }}</h4>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-calendar me-2"></i>{{ session.date|date:"F d, Y" }}
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-clock me-2"></i>{{ session.start_time|time:"h:i A" }}
+                    {% if session.end_time %} - {{ session.end_time|time:"h:i A" }}{% endif %}
+                </p>
+                <p class="mb-0 mt-2">
+                    <span class="badge bg-info">{{ session.get_session_type_display }}</span>
+                    {% if session.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Completed</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'attendance:mark_attendance' session.id %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ stats.total }}</h3>
+                <small class="text-muted">Total Students</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ stats.present }}</h3>
+                <small>Present</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ stats.absent }}</h3>
+                <small>Absent</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-0">{{ stats.percentage }}%</h3>
+                <small>Attendance Rate</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Records -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list me-2"></i>Attendance Records
+        </h6>
+        <div>
+            <button class="btn btn-sm btn-outline-success" onclick="filterByStatus('present')">Present</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="filterByStatus('absent')">Absent</button>
+            <button class="btn btn-sm btn-outline-warning" onclick="filterByStatus('late')">Late</button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="filterByStatus('')">All</button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="records-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                        <th>Verification</th>
+                        <th>Marked At</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr data-status="{{ record.status }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ record.student.roll_number }}</strong></td>
+                        <td>
+                            <a href="{% url 'attendance:student_detail' record.student.id %}">
+                                {{ record.student.full_name }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge {% if record.status == 'present' %}bg-success{% elif record.status == 'absent' %}bg-danger{% elif record.status == 'late' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                {{ record.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {% if record.verification_method == 'face_recognition' %}
+                                <i class="fas fa-camera me-1"></i>
+                                {% elif record.verification_method == 'mobile_gps' %}
+                                <i class="fas fa-mobile-alt me-1"></i>
+                                {% else %}
+                                <i class="fas fa-hand-pointer me-1"></i>
+                                {% endif %}
+                                {{ record.get_verification_method_display }}
+                            </small>
+                            {% if record.face_confidence %}
+                            <br><small class="text-success">Confidence: {{ record.face_confidence|floatformat:1 }}%</small>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ record.marked_at|time:"h:i A" }}</small></td>
+                        <td><small class="text-muted">{{ record.notes|default:"-" }}</small></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No attendance records found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function filterByStatus(status) {
+        $('#records-table tbody tr').each(function() {
+            if (status === '' || $(this).data('status') === status) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+</script>
+{% endblock %}

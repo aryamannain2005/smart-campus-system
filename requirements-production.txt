@@ -1,0 +1,26 @@
+# Production Requirements for Smart Campus System
+# Optimized for iOS deployment
+
+Django>=4.2,<5.0
+djangorestframework>=3.14
+Pillow>=10.0
+numpy>=1.24
+opencv-python>=4.8
+opencv-contrib-python>=4.8
+django-cors-headers>=4.2
+
+# Production-specific packages
+gunicorn>=21.2
+psycopg2-binary>=2.9  # PostgreSQL adapter
+django-environ>=0.11  # Environment variable management
+whitenoise>=6.5  # Static file serving
+
+# Optional: Face recognition (requires dlib)
+# deepface>=0.0.79
+# mtcnn>=0.1.1
+
+# Monitoring and logging
+sentry-sdk>=1.38  # Error tracking
+
+# Security
+django-ratelimit>=4.1  # Additional rate limiting

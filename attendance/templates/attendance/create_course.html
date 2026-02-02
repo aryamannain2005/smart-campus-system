@@ -1,0 +1,82 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Create Course - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📚 Create New Course</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_code" class="form-label">Course Code *</label>
+                            {{ form.code }}
+                            {% if form.code.errors %}
+                            <div class="text-danger small">{{ form.code.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">Unique identifier for the course (e.g., CS601, IT502)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">Course Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger small">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_department" class="form-label">Department *</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                            <div class="text-danger small">{{ form.department.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_semester" class="form-label">Semester *</label>
+                                {{ form.semester }}
+                                {% if form.semester.errors %}
+                                <div class="text-danger small">{{ form.semester.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_credits" class="form-label">Credits *</label>
+                                {{ form.credits }}
+                                {% if form.credits.errors %}
+                                <div class="text-danger small">{{ form.credits.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Create Course
+                            </button>
+                            <a href="{% url 'attendance:dashboard' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
