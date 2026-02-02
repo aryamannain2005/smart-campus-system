@@ -167,6 +167,8 @@ CORS_ALLOW_HEADERS = [
 ]
 
 # CSRF Trusted Origins (for Railway, Render, etc.)
+# Read from environment variable or use defaults
+_csrf_origins_env = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [
     'https://web-production-e335a.up.railway.app',
     'https://*.railway.app',
@@ -177,6 +179,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:8000',
     'https://127.0.0.1:8000',
 ]
+# Add any origins from environment variable
+if _csrf_origins_env:
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in _csrf_origins_env.split(',') if origin.strip()])
 
 # Face Recognition Settings
 FACE_RECOGNITION_TOLERANCE = 0.6
