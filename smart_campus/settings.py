@@ -168,11 +168,14 @@ CORS_ALLOW_HEADERS = [
 
 # CSRF Trusted Origins (for Railway, Render, etc.)
 CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-e335a.up.railway.app',
     'https://*.railway.app',
     'https://*.up.railway.app',
     'https://*.onrender.com',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'https://localhost:8000',
+    'https://127.0.0.1:8000',
 ]
 
 # Face Recognition Settings
