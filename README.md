@@ -1,26 +1,73 @@
 # Smart Campus Management System
 
-A comprehensive Django-based backend API for Smart Campus Management with an intelligent Attendance Management System. **Optimized for iOS app integration.**
+🎓 A comprehensive Django-based **Attendance Management System** with face recognition, real-time analytics, and a beautiful **LPU UMS-inspired orange theme**.
 
-## 🚀 Quick Start for iOS Developers
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new)
 
-**New to this project?** Start here:
-1. Read [QUICK_START.md](QUICK_START.md) - Get running in 10 minutes
-2. Review [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - Complete API reference
-3. Follow [IOS_DEPLOYMENT_GUIDE.md](IOS_DEPLOYMENT_GUIDE.md) - Deploy to production
+## ✨ Features
 
-## ✨ What's New (iOS Optimized)
+- 🎨 **Modern LPU UMS-inspired UI** - Orange gradient theme with dark sidebar
+- 📱 **Mobile-Ready REST API** - For iOS/Android app integration  
+- 🤖 **Face Recognition** - AI-powered attendance marking
+- 📊 **Real-time Analytics** - Instant attendance statistics
+- 👨‍🏫 **Faculty Portal** - Manage sessions, courses, and students
+- 👨‍🎓 **Student Portal** - View attendance records and profile
+- 🔔 **Notifications** - Automated absentee alerts
+- 🔐 **Secure** - Token authentication & HTTPS ready
 
-- ✅ **Token Authentication** - Secure API access for mobile apps
-- ✅ **RESTful API** - Complete REST API with pagination, filtering, and search
-- ✅ **Error Handling** - Comprehensive error responses for iOS
-- ✅ **CORS Configured** - Ready for iOS app integration
-- ✅ **Rate Limiting** - Built-in API throttling
-- ✅ **Production Ready** - Security headers, logging, and monitoring
-- ✅ **Face Recognition** - AI-powered attendance (optional)
-- ✅ **Push Notifications** - Real-time alerts (ready for implementation)
+## 🚀 Quick Start
 
-## Features
+### Local Development
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/smart-campus-system.git
+cd smart-campus-system
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Start development server
+python manage.py runserver
+```
+
+### Demo Credentials
+| Role | Username | Password |
+|------|----------|----------|
+| Faculty | FAC001 | password123 |
+| Faculty | FAC002 | password123 |
+
+## 📚 Documentation
+
+- [QUICK_START.md](QUICK_START.md) - Get running in 10 minutes
+- [API_DOCUMENTATION.md](API_DOCUMENTATION.md) - Complete API reference
+- [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Production deployment guide
+
+## 🚀 Deploy to Production
+
+### Railway (Recommended)
+1. Click the "Deploy on Railway" button above
+2. Connect your GitHub repository
+3. Add PostgreSQL database
+4. Set environment variables
+5. Done! 🎉
+
+### Render
+Use the included `render.yaml` for one-click deployment.
+
+## 🛠️ Tech Stack
+
+- **Backend:** Django 4.2+, Django REST Framework
+- **Database:** SQLite (dev) / PostgreSQL (prod)
+- **Frontend:** Bootstrap 5, Poppins Font
+- **Theme:** LPU UMS-inspired orange gradient
+- **Deployment:** Gunicorn, WhiteNoise
+
+---
+
+## Features (Detailed)
 
 ### 🎓 Smart Attendance Management System
 
